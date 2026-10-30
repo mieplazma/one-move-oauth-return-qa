@@ -19,13 +19,13 @@
       return values[0] || '';
     };
     const state = single('state'), code = single('code'), error = single('error');
-    if (!/^[a-f0-9]{64}$/i.test(state) || Boolean(code) === Boolean(error)) throw Error();
+    if ((!/^[a-f0-9]{64}$/i.test(state) && !/^tenant_[a-f0-9]{64}$/.test(state)) || Boolean(code) === Boolean(error)) throw Error();
     if (code && (code.length < 8 || /[\u0000-\u001f\u007f]/.test(code))) throw Error();
     if (error && !/^[A-Za-z0-9_]{1,80}$/.test(error)) throw Error();
     const response = new URLSearchParams({state});
     response.set(code ? 'code' : 'error', code || error);
     // No Google account routing fields, user-provided destination or tokens.
-    const destination = target + '#' + response.toString();
+    const destination = target + (state.startsWith('tenant_') ? '?tenant=1' : '') + '#' + response.toString();
     link.href = destination;
     link.hidden = false;
     window.location.replace(destination);
@@ -36,3 +36,4 @@
     link.hidden = false;
   }
 })();
+
